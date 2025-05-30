@@ -2,9 +2,12 @@ import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from 'path'
+
 
 dotenv.config();
 const app = express();
+const __dirname = path.resolve()
 app.use(express.json());
 app.use(cors());
 // This is for the access token request
@@ -15,6 +18,12 @@ const DropoffApi =
 const pickupApi =
   "https://api.sandbox.harborlockers.com/api/v1/locker-open-requests/pickup-locker-request";
 let token = "";
+
+
+// Serve all static files from the current directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+
 
 const params = new URLSearchParams();
 params.append("grant_type", "client_credentials");
@@ -106,4 +115,4 @@ app.post("/pickup-request", async (req, res) => {
 });
 
 
-app.listen(3000, () => console.log("Server running on http://localhost:3000"));
+app.listen(3000, () => console.log("started"));

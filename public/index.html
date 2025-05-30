@@ -3,7 +3,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Harbor Example Webapp</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <h1>LOCKER OPEN</h1>
@@ -19,7 +19,7 @@
     <div>You will need a mobile device to use the links served here. Use the link under the property "linkToken" to open the locker.</div>
     <script>
       document.getElementById("access_token").addEventListener("click", () => {
-        fetch("http://localhost:3000/access-token", {
+        fetch("https://harbor-example-webapp.onrender.com/access-token", {
           method: "POST",
         })
           .then((response) => response.json())
@@ -32,7 +32,7 @@
       });
 
       document.getElementById("open").addEventListener("click", () => {
-        fetch("http://localhost:3000/dropoff-request", {
+        fetch("https://harbor-example-webapp.onrender.com/dropoff-request", {
           method: "POST",
         })
           .then((response) => response.json())
@@ -60,7 +60,7 @@
           "locker-pickup-input"
         ).value;
 
-        fetch("http://localhost:3000/pickup-request", {
+        fetch("https://harbor-example-webapp.onrender.com/pickup-request", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

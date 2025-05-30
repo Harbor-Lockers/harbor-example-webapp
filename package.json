@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "build": "npm install && npm run build && node main.js"
+  },  
+  "type": "module",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
