@@ -1,94 +1,561 @@
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Harbor Example Webapp</title>
-    <link rel="stylesheet" href="./style.css" />
-  </head>
-  <body>
-    <h1>LOCKER OPEN</h1>
-    <button id="access_token">Request access token</button>
-    <button id="open">Call the locker open api</button>
-    <p id="response">Waiting for response...</p>
-    <input
-      aria-label="Input locker id from the response"
-      id="locker-pickup-input"
-    />
-    <button id="pickup">Request pickup url</button>
+    <title>Harbor Locker System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <div>You will need a mobile device to use the links served here. Use the link under the property "linkToken" to open the locker.</div>
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            font-weight: 300;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            padding: 1.5rem 1.5rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-description {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            min-width: 140px;
+            text-decoration: none;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn.loading {
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .pickup-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            padding: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .pickup-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .pickup-section .card-header {
+            padding: 0 0 1rem 0;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .status-message {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-message.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-message.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .response-container {
+            min-height: 100px;
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .waiting-message {
+            color: #64748b;
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .response-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .response-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .response-key {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .response-value {
+            color: #6b7280;
+            font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .error-message {
+            color: #dc2626;
+            background: #fef2f2;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #fecaca;
+            text-align: center;
+        }
+
+        .notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .notice-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .notice-content {
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem 0.5rem;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .input {
+                min-width: auto;
+            }
+
+            .response-item {
+                padding: 0.5rem;
+            }
+
+            .card-content {
+                padding: 1rem;
+            }
+
+            .pickup-section {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.75rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">Harbor Locker System</h1>
+            <p class="subtitle">Manage locker dropoffs and pickups with Harbor's secure locker system</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Authentication Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Authentication</h2>
+                    <p class="card-description">Request an access token to use Harbor's API services</p>
+                </div>
+                <div class="card-content">
+                    <button id="access_token" class="btn btn-primary">
+                        <span class="btn-text">Request Access Token</span>
+                        <div class="spinner hidden"></div>
+                    </button>
+                    <div id="token-status" class="status-message hidden"></div>
+                </div>
+            </div>
+
+            <!-- Locker Operations Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Locker Operations</h2>
+                    <p class="card-description">Request locker access for dropoff or pickup</p>
+                </div>
+                <div class="card-content">
+                    <div class="button-group">
+                        <button id="open" class="btn btn-secondary">
+                            <span class="btn-text">Request Dropoff Locker</span>
+                            <div class="spinner hidden"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Response</h2>
+                    <p class="card-description">API response data will appear here</p>
+                </div>
+                <div class="card-content">
+                    <div id="response" class="response-container">
+                        <div class="waiting-message">Waiting for response...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pickup-section">
+                <div class="input-group">
+                    <p class="card-header">First use the linkToken on your mobile device to do a dropoff</p>
+                    <input
+                        type="number"
+                        id="locker-pickup-input"
+                        placeholder="Enter Locker ID"
+                        aria-label="Input locker id from the response"
+                        class="input"
+                    />
+                    <button id="pickup" class="btn btn-secondary">
+                        <span class="btn-text">Request Pickup URL</span>
+                        <div class="spinner hidden"></div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Notice -->
+            <div class="notice">
+                <div class="notice-icon">📱</div>
+                <div class="notice-content">
+                    <strong>Mobile Device Required:</strong> You will need a mobile device to use the locker access links provided in the response.
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-      document.getElementById("access_token").addEventListener("click", () => {
-        fetch("https://harbor-example-webapp.onrender.com/access-token", {
-          method: "POST",
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log("you've got access token");
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-          });
-      });
+        // Utility functions
+        function showSpinner(buttonId) {
+            const button = document.getElementById(buttonId);
+            const spinner = button.querySelector('.spinner');
+            const text = button.querySelector('.btn-text');
+            spinner.classList.remove('hidden');
+            button.disabled = true;
+            button.classList.add('loading');
+        }
 
-      document.getElementById("open").addEventListener("click", () => {
-        fetch("https://harbor-example-webapp.onrender.com/dropoff-request", {
-          method: "POST",
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            document.getElementById("response").innerHTML = "";
-            Object.keys(data).forEach((key) => {
-              const value = data[key];
-              const para = document.createElement("p");
-              para.innerHTML = `<strong>${key}:</strong> ${JSON.stringify(
-                value,
-                null,
-                2
-              )}`;
-              document.getElementById("response").appendChild(para);
-            });
-          })
-          .catch((error) => {
-            rdocument.getElementById(
-              "response"
-            ).innerText = `Error: ${error.message}`;
-          });
-      });
-      document.getElementById("pickup").addEventListener("click", () => {
-        const lockerIdInput = document.getElementById(
-          "locker-pickup-input"
-        ).value;
+        function hideSpinner(buttonId) {
+            const button = document.getElementById(buttonId);
+            const spinner = button.querySelector('.spinner');
+            const text = button.querySelector('.btn-text');
+            spinner.classList.add('hidden');
+            button.disabled = false;
+            button.classList.remove('loading');
+        }
 
-        fetch("https://harbor-example-webapp.onrender.com/pickup-request", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            lockerId: parseInt(lockerIdInput, 10),
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            document.getElementById("response").innerHTML = "";
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('token-status');
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.classList.remove('hidden');
+        }
+
+        function displayResponse(data) {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = '';
+            
+            if (data.error) {
+                responseDiv.innerHTML = `<div class="error-message">Error: ${data.error}</div>`;
+                return;
+            }
+
+            // Create formatted response
+            const responseContent = document.createElement('div');
+            responseContent.className = 'response-content';
+            
             Object.keys(data).forEach((key) => {
-              const value = data[key];
-              const para = document.createElement("p");
-              para.innerHTML = `<strong>${key}:</strong> ${JSON.stringify(
-                value,
-                null,
-                2
-              )}`;
-              document.getElementById("response").appendChild(para);
+                const value = data[key];
+                const item = document.createElement('div');
+                item.className = 'response-item';
+                
+                const keySpan = document.createElement('span');
+                keySpan.className = 'response-key';
+                keySpan.textContent = key + ':';
+                
+                const valueSpan = document.createElement('span');
+                valueSpan.className = 'response-value';
+                valueSpan.textContent = typeof value === 'object' ? JSON.stringify(value, null, 2) : value;
+                
+                item.appendChild(keySpan);
+                item.appendChild(valueSpan);
+                responseContent.appendChild(item);
             });
-          })
-          .catch((error) => {
-            document.getElementById(
-              "response"
-            ).innerText = `Error: ${error.message}`;
-          });
-      });
+
+            responseDiv.appendChild(responseContent);
+        }
+
+        // Event listeners
+        document.getElementById("access_token").addEventListener("click", () => {
+            showSpinner('access_token');
+            
+            fetch("/access-token", {
+                method: "POST",
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                hideSpinner('access_token');
+                if (data.error) {
+                    showStatus('Authentication failed: ' + data.error, 'error');
+                } else {
+                    showStatus('Access token acquired successfully!', 'success');
+                    console.log("Access token acquired");
+                }
+            })
+            .catch((error) => {
+                hideSpinner('access_token');
+                showStatus('Network error: ' + error.message, 'error');
+                console.error("Error:", error);
+            });
+        });
+
+        document.getElementById("open").addEventListener("click", () => {
+            showSpinner('open');
+            
+            fetch("/dropoff-request", {
+                method: "POST",
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                hideSpinner('open');
+                displayResponse(data);
+            })
+            .catch((error) => {
+                hideSpinner('open');
+                displayResponse({ error: error.message });
+            });
+        });
+
+        document.getElementById("pickup").addEventListener("click", () => {
+            const lockerIdInput = document.getElementById("locker-pickup-input").value;
+            
+            if (!lockerIdInput) {
+                alert('Please enter a Locker ID');
+                return;
+            }
+
+            showSpinner('pickup');
+
+            fetch("/pickup-request", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    lockerId: parseInt(lockerIdInput, 10),
+                }),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                hideSpinner('pickup');
+                displayResponse(data);
+            })
+            .catch((error) => {
+                hideSpinner('pickup');
+                displayResponse({ error: error.message });
+            });
+        });
     </script>
-  </body>
+</body>
 </html>
