@@ -67,7 +67,7 @@ app.post("/get-closest-location", async (req, res) => {
     console.log(`Finding closest location for coordinates: ${latitude}, ${longitude}`)
 
     const response = await fetch(
-      `${getClosestLocationApi}?lat=${latitude}&lon=${longitude}&radius=0.9&hasKeypad=false&ownedByMe=true`, // remove ownedByMe=true for production
+      `${getClosestLocationApi}?lat=${latitude}&lon=${longitude}&radius=0.9`, 
       {
         method: "GET",
         headers: {

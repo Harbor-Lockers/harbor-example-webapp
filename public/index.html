@@ -650,7 +650,7 @@
             let errorMessage = "Unable to get location: ";
             switch (error.code) {
               case error.PERMISSION_DENIED:
-                errorMessage += "Location access denied by user.";
+                errorMessage += "Location access denied by user. Check if your browser allows location permissions";
                 break;
               case error.POSITION_UNAVAILABLE:
                 errorMessage += "Location information unavailable.";
